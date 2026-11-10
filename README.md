@@ -1,5 +1,5 @@
 # Maintaining SunSpec read permissions after inverter replacement
-Worked example for an MS Cybersecurity thesis · 10 November 2026
+Worked example · 10 November 2026
 
 ## Site decision
 
