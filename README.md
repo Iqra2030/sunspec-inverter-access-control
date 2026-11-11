@@ -35,4 +35,3 @@ The [Fronius instructions](https://manuals.fronius.com/html/4204102049/en-US.htm
 
 The 15 supplied answer-key decisions pass, together with stale-rule, semantic-mismatch and targeted regression checks. The answer key remains author-prepared. No independent validation or physical-device experiment has occurred.
 
-See [threat model](THREAT_MODEL.md) and [novelty search and evaluation requirements](RESEARCH_REVIEW.md).
