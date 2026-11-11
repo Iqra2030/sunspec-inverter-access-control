@@ -1,0 +1,67 @@
+{
+  "name": "Fronius non-Hybrid Datamanager, float mode, models 113 + 160",
+  "address_convention": "zero-based protocol addresses. Fronius register number minus 1; the SunS marker is at address 40000 (FRO-OI p.18).",
+  "unit_id": 1,
+  "unit_id_note": "Site-configured. Inverter number 01 maps to unit ID 001, number 00 maps to 100. Meter is 240, string controls from 101, sensor cards from 245 (FRO-OI p.16-17). Example value.",
+  "function_codes_supported": [
+    3,
+    6,
+    16
+  ],
+  "function_codes_source": "FRO-OI p.7: 03 read holding, 06 write single, 16 write multiple",
+  "session_notes": "Queries should run sequentially with a timeout of at least 10 s (FRO-OI p.15). Control writes can be restricted by source IP in the web interface (FRO-OI p.30).",
+  "documents": {
+    "FRO-OI": "Official HTML operating instructions https://manuals.fronius.com/html/4204102049/en-US.html. Earlier v3 page citations refer to its mirrored PDF edition.",
+    "FRO-MAP": "Retrieved 2026-11-11 from https://www.fronius.com/QR-link/0006. Inverter_Register_Map_Float_v1.0_with_SYMOHYBRID_MODEL_124.xlsx, Complete Map. SHA256 993e43a66e4e5db27f148e8d46d5c2a1920fd5b375ddf6887c81d8956f4ea273.",
+    "SEC-OEM": "openenergymonitor.org forum transcription of the Fronius float map ('from docs'). Secondary source."
+  },
+  "points": {
+    "W": {
+      "model": 113,
+      "start": 40091,
+      "regs": 2,
+      "type": "float32",
+      "sf": null,
+      "unit": "W",
+      "supported": true,
+      "semantic": "inverter total AC active power",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "FRO-MAP Complete Map row 39, printed registers converted to zero-based addresses. DC energy and its scale factor excluded on Fronius Hybrid inverters."
+      }
+    },
+    "DCWH_1": {
+      "model": 160,
+      "start": 40285,
+      "regs": 2,
+      "type": "acc32",
+      "sf": "DCWH_SF",
+      "unit": "Wh",
+      "supported": true,
+      "semantic": "DC lifetime energy of MPPT input 1 (string 1)",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "FRO-MAP Complete Map row 192, printed registers converted to zero-based addresses. DC energy and its scale factor excluded on Fronius Hybrid inverters."
+      }
+    },
+    "DCWH_SF": {
+      "model": 160,
+      "start": 40268,
+      "regs": 1,
+      "type": "sunssf",
+      "sf": null,
+      "unit": "",
+      "supported": true,
+      "semantic": "scale factor for DC lifetime energy",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "FRO-MAP Complete Map row 183, printed registers converted to zero-based addresses. DC energy and its scale factor excluded on Fronius Hybrid inverters."
+      }
+    }
+  },
+  "hazards": [
+    "FRO-OI p.18: register addresses do not remain constant. Find the model by request, then use offsets.",
+    "FRO-OI p.31-32: register F_ModelType (number 216, address 215) switches float and int+SF. All later model addresses then shift. Writable over Modbus.",
+    "FRO-OI p.21: an unsupported acc32 reads as 0, the same as a real zero."
+  ]
+}

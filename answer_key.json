@@ -1,0 +1,24 @@
+{
+  "note": "Author-prepared. Function codes and unit IDs follow the manuals (see profiles). A later experiment needs a second reviewer to write this key before any rules are generated.",
+  "requests": [
+    {"profile": "fronius",   "role": "dashboard", "unit": 1,   "fc": 3,  "start": 40091, "count": 2, "expect": true},
+    {"profile": "fronius",   "role": "analyst",   "unit": 1,   "fc": 3,  "start": 40285, "count": 2, "expect": true},
+    {"profile": "fronius",   "role": "analyst",   "unit": 1,   "fc": 3,  "start": 40268, "count": 1, "expect": true},
+    {"profile": "fronius",   "role": "dashboard", "unit": 240, "fc": 3,  "start": 40091, "count": 2, "expect": false, "why": "unit 240 is the energy meter behind the same Datamanager address"},
+    {"profile": "fronius",   "role": "dashboard", "unit": 1,   "fc": 6,  "start": 215,   "count": 1, "expect": false, "why": "F_ModelType (register 216) would shift every later model address"},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 3,  "start": 40083, "count": 2, "expect": true},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 3,  "start": 40083, "count": 1, "expect": true, "why": "whole point W; scale factor can be read separately"},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 3,  "start": 40091, "count": 2, "expect": false},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 3,  "start": 40083, "count": 3, "expect": false},
+    {"profile": "solaredge", "role": "analyst",   "unit": 1,   "fc": 3,  "start": 40143, "count": 2, "expect": false},
+    {"profile": "solaredge", "role": "analyst",   "unit": 1,   "fc": 3,  "start": 40285, "count": 2, "expect": false},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 4,  "start": 40083, "count": 2, "expect": false, "why": "neither manual documents FC 4"},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 6,  "start": 40083, "count": 1, "expect": false},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 16, "start": 40083, "count": 2, "expect": false},
+    {"profile": "solaredge", "role": "dashboard", "unit": 1,   "fc": 23, "start": 40083, "count": 2, "expect": false}
+  ],
+  "diff": [
+    {"role": "dashboard", "task": "total_ac_power", "change": "moved", "decoder_change": true, "semantic_review": false},
+    {"role": "analyst", "task": "input1_lifetime_dc_energy", "change": "unsupported"}
+  ]
+}

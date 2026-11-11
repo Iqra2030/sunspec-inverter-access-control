@@ -1,38 +1,38 @@
 # Maintaining SunSpec read permissions after inverter replacement
-Worked example · 10 November 2026
+Worked example · Reviewed 11 November 2026
 
-## Site decision
+Run `python3 verify.py` with Python 3. The implementation uses the standard library.
+The checks exercise an offline authorisation model. A trusted caller supplies the authenticated role and the intended device profile.
 
-A dashboard may read total inverter AC active power in watts. A separate yield analyst may read lifetime DC energy for the first reported DC input in watt-hours. The operator approves only those measurements and their decoding prerequisites. The two applications cross the same logical conduit. This example assumes authenticated roles and a trusted, prevalidated profile inventory. Discovery belongs to commissioning, outside the application permissions.
+## Approved workflows
 
-Compare a three-phase Fronius Datamanager float configuration (113 plus 160) with a SolarEdge three-phase Synergy logging profile (103 plus 160). These are documented interface profiles. Physical interchangeability, a specific installed firmware, and real device behaviour have not been tested.
+The dashboard reads total inverter AC active power in watts. The analyst reads lifetime DC energy of MPPT input 1 in watt-hours. Each task includes its intended meaning and units. Policies grant only FC03 reads, the configured unit ID, complete named points and their scale-factor dependencies. Rejecting partial multi-register points is an explicit local policy choice.
 
-## Profile evidence and decisions
-
-Addresses below are **zero-based protocol addresses**, inclusive. Subtract one from the Fronius table's printed register number. SolarEdge supplies both conventions. These are monitoring points only.
-
-| Approved task | Before, Fronius | After, SolarEdge | Expected policy change |
+| Task | Fronius non-Hybrid Datamanager float | SolarEdge three-phase Synergy | Outcome |
 |---|---|---|---|
-| Dashboard reads total active power W | Printed 40092–40093 → 40091–40092, one float32 | 40083 is a signed value and 40084 its signed decimal scale factor. Watts = value × 10^scale. | Move the permission to 40083–40084 and change the decoder. Retire the former pair. |
-| Yield analyst reads input 1 lifetime DC energy | Printed 40286–40287 → 40285–40286, acc32. Printed 40269 → 40268 supplies DCWH_SF. | The first repeated unit's DCWH at 40143–40144 is explicitly unsupported. The manual gives zero as the placeholder. | Return unsupported task and issue no permission for the analyst. A placeholder zero is not a measured zero. |
+| Total AC power | 40091–40092, float32 | 40083 value, 40084 scale factor | Retire the former span, grant the new pair, change decoder. |
+| MPPT input 1 lifetime DC energy | 40285–40286 plus scale factor 40268 | Synergy unit 0 DCWH at 40143–40144 is unsupported | Withhold permission. Its measurement scope would also need review if support were introduced. |
 
-**Why an address-only policy fails.** On SolarEdge the old dashboard addresses 40091–40092 designate power factor and its scale. Reusing the Fronius rule leaves the desired power measurement inaccessible and permits a read of different fields. The presence of model 160 on both devices also fails to establish that the requested energy counter is supported. An aggregate inverter energy reading would change the unit of observation and cannot fulfil the analyst's task.
+All addresses are zero-based. The old Fronius power addresses map to SolarEdge PF and PF_SF. This demonstrates a stale permission's changed meaning. The SolarEdge rows have a split-phase support footnote, so the example makes no claim that a three-phase Synergy device returns meaningful power-factor values there.
 
-## Expected decisions for the replacement
+## Evidence verified in this review
 
-| Role and request | Expected result | Reason |
-|---|---|---|
-| Dashboard reads 40083–40084 | Permit | Both registers are needed to decode watts. |
-| Dashboard reads 40091–40092 | Deny | Stale permission. |
-| Dashboard reads 40083–40085 | Deny whole request | The last register is outside the task. |
-| Analyst requests input 1 lifetime energy | Report unsupported at policy generation | The profile explicitly declares the counter unavailable. |
-| Analyst reads 40143–40144 or a former Fronius address | Deny | No active mapping fulfils the task. |
-| Either application writes | Deny | Both approved tasks are read-only. |
+Fronius's official [map archive](https://www.fronius.com/QR-link/0006) was retrieved successfully. In `Inverter_Register_Map_Float_v1.0_with_SYMOHYBRID_MODEL_124.xlsx`, sheet `Complete Map`, rows 39, 183 and 192 specify W, DCWH_SF and 1_DCWH. Subtract one from printed register numbers. The DC energy rows explicitly exclude Hybrid inverters. SHA256 of this workbook is `993e43a66e4e5db27f148e8d46d5c2a1920fd5b375ddf6887c81d8956f4ea273`.
 
-Run `python3 verify.py` offline. The fixture checks expected decisions for both profiles, including the stale-rule counterexample. An illustrative SolarEdge raw value of 12345 at scale −1 decodes to 1234.5 W. Values are synthetic. The checks are author-prepared consistency tests. A later experiment needs an independent reviewer and a manual baseline to measure any advantage.
+The official [SolarEdge note](https://knowledge-center.solaredge.com/sites/kc/files/sunspec-implementation-technical-note.pdf) now serves v3.3, October 2026. Rechecked power on printed p.17, power factor on p.19 and Synergy unit 0 on p.21. The addresses used by the example agree with v3. The counter description is “0 (not supported)”.
 
-## Sources
+The [Fronius instructions](https://manuals.fronius.com/html/4204102049/en-US.html) document float/int+SF selection and the distinct unit ID for the meter. Device selection must include the endpoint as well as its unit ID in a future gateway. Current policies are scoped to a single selected endpoint.
 
-1. [Fronius Datamanager operating instructions](https://manuals.fronius.com/html/4204102049/en-US.html), Common & Inverter Model and Multiple MPPT Inverter Extension Model.
-2. [Fronius Datamanager float register table, mirrored manufacturer document](https://www.photovoltaikforum.com/core/attachment/103560-inverter-register-map-float-v1-0-with-symohybrid-model-124-pdf/), rows W, DCWH_SF and 1_DCWH. The table identifies the inverter family as 111–113 and the W type as float32.
-3. [SolarEdge SunSpec Logging Technical Note, v3.2, June 2025](https://knowledge-center.solaredge.com/sites/kc/files/sunspec-implementation-technical-note.pdf), inverter model mapping and multiple-MPPT extension. Compare I_AC_Power, I_AC_Power_SF, I_AC_PF and the first DCWH row.
+## Review corrections
+
+- Task operations are checked during generation. A write task cannot acquire a read grant.
+- A supported field with a different meaning or units produces `review_required` and no permission.
+- Missing or unsupported scale factors withhold the corresponding task permission.
+- Request fields are checked for integer types, register bounds and the FC03 quantity limit.
+- Changes are matched by role and task ID. Removed roles/tasks are retired and added tasks are reported.
+- Unsupported results no longer skip the removal list.
+- A partial profile's unmapped address means unknown to this inventory. It does not prove that the physical inverter has no register there.
+
+The 15 supplied answer-key decisions pass, together with stale-rule, semantic-mismatch and targeted regression checks. The answer key remains author-prepared. No independent validation or physical-device experiment has occurred.
+
+See [threat model](THREAT_MODEL.md) and [novelty search and evaluation requirements](RESEARCH_REVIEW.md).

@@ -1,0 +1,93 @@
+{
+  "name": "SolarEdge three-phase Synergy inverter (models 103 + 160)",
+  "address_convention": "zero-based protocol addresses. The manual lists a base 0 and a base 1 column; this file uses base 0.",
+  "unit_id": 1,
+  "unit_id_note": "Default unit ID of an Ethernet-connected inverter is 1 (SE-TN p.11).",
+  "function_codes_supported": [
+    3,
+    6,
+    16
+  ],
+  "function_codes_source": "SE-TN Appendix A: 0x03 read holding, 0x06 preset single, 0x10 preset multiple",
+  "session_notes": "Modbus TCP is off by default. Default port 1502 (SetApp) or 502 (LCD). Only ONE connection and session is supported (SE-TN p.11, p.13). Two applications cannot hold direct sessions. A gateway must multiplex.",
+  "documents": {
+    "SE-TN": "Rechecked 2026-11-11 at https://knowledge-center.solaredge.com/sites/kc/files/sunspec-implementation-technical-note.pdf, now v3.3 October 2026. Earlier v3 p. references refer to v3.2."
+  },
+  "points": {
+    "W": {
+      "model": 103,
+      "start": 40083,
+      "regs": 1,
+      "type": "int16",
+      "sf": "W_SF",
+      "unit": "W",
+      "supported": true,
+      "semantic": "inverter total AC active power",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "SE-TN p.16, Inverter Model MODBUS Register Mappings: I_AC_Power, base 0 = 40083, base 1 = 40084, int16, Watts. Rechecked in v3.3, printed p.17."
+      }
+    },
+    "W_SF": {
+      "model": 103,
+      "start": 40084,
+      "regs": 1,
+      "type": "sunssf",
+      "sf": null,
+      "unit": "",
+      "supported": true,
+      "semantic": "scale factor for AC active power",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "SE-TN p.16: I_AC_Power_SF, base 0 = 40084. Rechecked in v3.3, printed p.17."
+      }
+    },
+    "PF": {
+      "model": 103,
+      "start": 40091,
+      "regs": 1,
+      "type": "int16",
+      "sf": "PF_SF",
+      "unit": "%",
+      "supported": false,
+      "semantic": "inverter power factor",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "SE-TN p.17: I_AC_PF, base 0 = 40091, int16, %. The row carries a footnote marker I could not resolve in the extracted PDF. Addresses are unaffected. Rechecked in v3.3, printed p.19. Address assignment is verified. Support on this three-phase profile is conservatively disabled because of the split-phase footnote; the stale-address counterexample asserts wrong field mapping, not a valid PF value."
+      }
+    },
+    "PF_SF": {
+      "model": 103,
+      "start": 40092,
+      "regs": 1,
+      "type": "sunssf",
+      "sf": null,
+      "unit": "",
+      "supported": false,
+      "semantic": "scale factor for power factor",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "SE-TN p.17: I_AC_PF_SF, base 0 = 40092. Rechecked in v3.3, printed p.19. Address assignment is verified. Support on this three-phase profile is conservatively disabled because of the split-phase footnote; the stale-address counterexample asserts wrong field mapping, not a valid PF value."
+      }
+    },
+    "DCWH_1": {
+      "model": 160,
+      "start": 40143,
+      "regs": 2,
+      "type": "acc32",
+      "sf": null,
+      "unit": "Wh",
+      "supported": false,
+      "semantic": "DC lifetime energy of Synergy unit 0",
+      "note": "Manual lists DCWH of Synergy Unit 0 as '0 (not supported)'. Model 160 exists only on three-phase Synergy inverters with firmware 4.13.xx or later, and its blocks are Synergy units, not DC inputs.",
+      "evidence": {
+        "status": "verified-primary",
+        "basis": "SE-TN p.17-18: Synergy Unit 0 block, DCWH, 2 registers, acc32, base 0 = 40143, '0 (not supported)'. DCWH_SF (40126) is also '0 (not supported)'. Rechecked in v3.3, printed p.21."
+      }
+    }
+  },
+  "hazards": [
+    "SE-TN p.17: model 160 is supported only on Synergy inverters, firmware 4.13.xx or later.",
+    "SE-TN p.15: unsupported values read as NOT_IMPLEMENTED. For this counter the manual shows 0."
+  ]
+}

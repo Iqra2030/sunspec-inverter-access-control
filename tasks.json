@@ -1,0 +1,26 @@
+{
+  "tasks": {
+    "total_ac_power": {
+      "description": "Read total inverter AC active power (W)",
+      "point": "W",
+      "operation": "read",
+      "semantic": "inverter total AC active power",
+      "unit": "W"
+    },
+    "input1_lifetime_dc_energy": {
+      "description": "Read lifetime DC energy of the first DC input (Wh)",
+      "point": "DCWH_1",
+      "operation": "read",
+      "semantic": "DC lifetime energy of MPPT input 1 (string 1)",
+      "unit": "Wh"
+    }
+  },
+  "roles": {
+    "dashboard": [
+      "total_ac_power"
+    ],
+    "analyst": [
+      "input1_lifetime_dc_energy"
+    ]
+  }
+}
