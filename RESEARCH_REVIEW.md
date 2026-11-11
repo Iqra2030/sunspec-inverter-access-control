@@ -25,9 +25,3 @@ Inspected official specification sections, the ForestFirewalls technical report,
 
 The patent is included as technical prior-art evidence. This review provides no legal assessment.
 
-## Evaluation still required
-The uploaded package contains two profiles, two roles and two tasks. It therefore does not meet the proposed larger evaluation condition.
-
-Use at least three documented profiles or configurations and several roles/tasks. Explicitly distinguish a configuration variant from a third manufacturer. Compare the generated policy with a manual SunSpec-aware policy using the same role map, task documents and enforcement engine. Seed stale spans, excess range access, wrong unit IDs, missing scale factors, semantic mismatches and unsupported counters. Ask an independent reviewer to write and freeze the answer key before running the generator. Record false permits, false denials, unsupported-task detection, required edits and comparable maintenance time.
-
-Tests in this repository establish implementation consistency. They do not establish novelty, independent correctness or a measured advantage over the manual baseline. Take this example and the documented overlap to the supervisor before committing to a final contribution.
